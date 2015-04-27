@@ -142,7 +142,25 @@ main(int argc, char** argv)
     }
     chdir("..");
 
-    setenv("PYTHONPATH", pypath.c_str(), 1);
+    std::string fallback_python_path(pypath);
+    const char *search_path = Py_GetPath();
+    if (search_path != NULL) {
+        // if there is a path to use append it to our custom search path as a fallback
+        std::cout << "Py_GetPath: " << search_path << std::endl;
+        fallback_python_path += ':' + search_path;
+    } else {
+        std::cout << "Py_GetPath: NULL" << std::endl;
+    }
+
+    const char* pythonpath = getenv("PYTHONPATH");
+    if (pythonpath) {
+        // if there is a pythonpath to use append it to our custom search path as a fallback
+        std::cout << "PYTHON PATH " << pythonpath << std::endl;
+        fallback_python_path += ':' + pythonpath;
+    } else {
+        std::cout << "PYTHONPATH: NULL" << std::endl;
+    }
+    setenv("PYTHONPATH", fallback_python_path.c_str(), 1);
 #endif
 
     Py_SetPythonHome(const_cast<char*>(full_path.string().c_str()));
@@ -159,10 +177,12 @@ main(int argc, char** argv)
 
     py::exec(
       "import sys\n"
+      "_old_sys_path = sys.path\n"
       "sys.path = [_pwd + '/apps',\n"
       "            _pwd + '/lib',\n"
       "            _pwd + '/apps/eip',\n"
       "            _pwd]\n"
+      "sys.path.extend(_old_sys_path)\n"
       "import os\n"
       "import encodings.idna\n" // we need to make sure this is imported
       "sys.argv.append('--standalone')\n"
