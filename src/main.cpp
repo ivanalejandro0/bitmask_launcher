@@ -147,7 +147,7 @@ main(int argc, char** argv)
     if (search_path != NULL) {
         // if there is a path to use append it to our custom search path as a fallback
         std::cout << "Py_GetPath: " << search_path << std::endl;
-        fallback_python_path += ':' + search_path;
+        fallback_python_path += ':' + std::string(search_path);
     } else {
         std::cout << "Py_GetPath: NULL" << std::endl;
     }
@@ -156,7 +156,7 @@ main(int argc, char** argv)
     if (pythonpath) {
         // if there is a pythonpath to use append it to our custom search path as a fallback
         std::cout << "PYTHON PATH " << pythonpath << std::endl;
-        fallback_python_path += ':' + pythonpath;
+        fallback_python_path += ':' + std::string(pythonpath);
     } else {
         std::cout << "PYTHONPATH: NULL" << std::endl;
     }
